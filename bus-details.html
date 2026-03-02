@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bus Details</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 18px 24px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .header-subtitle {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 10px 18px;
+      border: 2px solid white;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .back-btn:hover {
+      background: white;
+      color: #667eea;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .grid-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    @media (max-width: 1024px) {
+      .grid-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Info Panel */
+    .info-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .bus-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: #f5f7fa;
+      border-radius: 10px;
+      margin-bottom: 18px;
+    }
+
+    .status-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-indicator {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .status-indicator.active {
+      background: #4caf50;
+      animation: pulse 2s infinite;
+    }
+
+    .status-indicator.inactive {
+      background: #9e9e9e;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 0.5;
+        transform: scale(1.1);
+      }
+    }
+
+    .status-text {
+      font-weight: 600;
+    }
+
+    .badge-live {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(76, 175, 80, 0.1);
+      color: #2e7d32;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-offline {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eee;
+      color: #777;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .info-section {
+      margin-bottom: 18px;
+    }
+
+    .info-section h3 {
+      font-size: 13px;
+      color: #888;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 14px;
+    }
+
+    .info-item:last-child {
+      border-bottom: none;
+    }
+
+    .info-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .info-value {
+      color: #333;
+      font-weight: 600;
+    }
+
+    .speed-display {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 18px;
+      border-radius: 12px;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .speed-value {
+      font-size: 40px;
+      font-weight: bold;
+    }
+
+    .speed-label {
+      font-size: 13px;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .stat-box {
+      background: #f5f7fa;
+      padding: 12px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-box .value {
+      font-size: 20px;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-box .label {
+      font-size: 11px;
+      color: #666;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Map Panel */
+    .map-panel {
+      background: white;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .map-panel h2 {
+      margin-bottom: 10px;
+      color: #333;
+      font-size: 18px;
+    }
+
+    #busMap {
+      height: 480px;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
+      #busMap {
+        height: 360px;
+      }
+    }
+
+    /* History Section */
+    .history-section {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+      margin-top: 18px;
+    }
+
+    .history-section h2 {
+      margin-bottom: 14px;
+      color: #333;
+      font-size: 18px;
+    }
+
+    .history-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .history-btn {
+      padding: 8px 14px;
+      border: 1.5px solid #667eea;
+      background: white;
+      color: #667eea;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 13px;
+    }
+
+    .history-btn:hover,
+    .history-btn.active {
+      background: #667eea;
+      color: white;
+    }
+
+    #historyMap {
+      height: 380px;
+      border-radius: 10px;
+    }
+
+    @media (max-width: 600px) {
+      #historyMap {
+        height: 320px;
+      }
+    }
+
+    /* System messages */
+    .message {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    .message.error {
+      background: #ffebee;
+      color: #b71c1c;
+    }
+
+    .message.info {
+      background: #e3f2fd;
+      color: #0d47a1;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="header">
+    <div class="header-left">
+      <h1 id="busTitle">Bus Details</h1>
+      <div class="header-subtitle" id="routeSubtitle">Loading route info...</div>
+    </div>
+    <button onclick="window.history.back()" class="back-btn">
+      <span>←</span><span>Back to Dashboard</span>
+    </button>
+  </div>
+
+  <div class="container">
+
+    <div id="pageMessage" class="message info" style="display:none;"></div>
+
+    <div class="grid-layout">
+
+      <!-- Info Panel -->
+      <div class="info-panel">
+        <div class="bus-status">
+          <div class="status-left">
+            <div class="status-indicator inactive" id="statusIndicator"></div>
+            <span class="status-text" id="statusText">Loading...</span>
+          </div>
+          <span id="statusBadge" class="badge-offline">Checking...</span>
+        </div>
+
+        <div class="info-section">
+          <h3>Bus Information</h3>
+          <div class="info-item">
+            <span class="info-label">Bus Number</span>
+            <span class="info-value" id="busNumber">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Bus ID</span>
+            <span class="info-value" id="busId">-</span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Driver</h3>
+          <div class="info-item">
+            <span class="info-label">Driver Name</span>
+            <span class="info-value" id="driverName">-</span>
+          </div>
+        </div>
+
+        <div class="info-section">
+          <h3>Route</h3>
+          <div class="info-item">
+            <span class="info-label">From</span>
+            <span class="info-value" id="fromLocation">-</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">To</span>
+            <span class="info-value" id="toLocation">-</span>
+          </div>
+        </div>
+
+        <div class="speed-display">
+          <div class="speed-value" id="speedValue">0.0</div>
+          <div class="speed-label">Current Speed (km/h)</div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <div class="value" id="totalPoints">0</div>
+            <div class="label">History Points</div>
+          </div>
+          <div class="stat-box">
+            <div class="value" id="lastUpdate">-</div>
+            <div class="label">Last Update</div>
+          </div>
+          <div class="stat-box">
+            <div class="value" id="avgSpeed">0.0</div>
+            <div class="label">Avg Speed (km/h)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map Panel -->
+      <div class="map-panel">
+        <h2>🗺️ Live Location</h2>
+        <div id="busMap">
+          <div class="loading">Loading map &amp; live location...</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- History Section -->
+    <div class="history-section">
+      <h2>📊 Route History</h2>
+      <div class="history-controls">
+        <button class="history-btn active" onclick="loadHistory('all', this)">All History</button>
+        <button class="history-btn" onclick="loadHistory('today', this)">Today</button>
+        <button class="history-btn" onclick="loadHistory('recent', this)">Last 100 Points</button>
+      </div>
+      <div id="historyMap">
+        <div class="loading">Select a filter to draw route history.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // ------------------- Firebase config -------------------
+    const firebaseConfig = {
+      databaseURL: "https://ewubdcapstonelocalbus-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // ------------------- URL params -------------------
+    const urlParams = new URLSearchParams(window.location.search);
+    const busNumber = urlParams.get('bus');
+
+    const pageMessageEl = document.getElementById('pageMessage');
+
+    if (!busNumber) {
+      pageMessageEl.textContent = 'No bus specified. Redirecting to dashboard...';
+      pageMessageEl.className = 'message error';
+      pageMessageEl.style.display = 'block';
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 1500);
+    }
+
+    // ------------------- Map globals -------------------
+    let liveMap, historyMap;
+    let liveMarker = null;
+    let livePolyline = null;
+    let historyPolyline = null;
+    let historyStartMarker = null;
+    let historyEndMarker = null;
+
+    let busData = {
+      busInfo: {},
+      status: 'inactive',
+      locations: {},
+      history: {}
+    };
+
+    // ------------------- Init maps -------------------
+    function initMaps() {
+      liveMap = L.map('busMap').setView([23.8103, 90.4125], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(liveMap);
+
+      historyMap = L.map('historyMap').setView([23.8103, 90.4125], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(historyMap);
+    }
+
+    // ------------------- Load bus data -------------------
+    function loadBusData() {
+      const busRef = db.ref(`driver_location/private_bus/${busNumber}`);
+
+      busRef.on('value', snapshot => {
+        if (!snapshot.exists()) {
+          pageMessageEl.textContent = 'Bus not found in the system.';
+          pageMessageEl.className = 'message error';
+          pageMessageEl.style.display = 'block';
+          return;
+        }
+
+        pageMessageEl.style.display = 'none';
+
+        const data = snapshot.val() || {};
+        busData.busInfo = data.Bus_Info || {};
+        busData.status = data.status || 'inactive';
+        busData.locations = data.locations || {};
+        busData.history = data.history_locations || {};
+
+        updateUI();
+        updateLiveMap();
+      }, error => {
+        pageMessageEl.textContent = 'Error loading bus data: ' + error.message;
+        pageMessageEl.className = 'message error';
+        pageMessageEl.style.display = 'block';
+      });
+    }
+
+    // ------------------- UI update -------------------
+    function updateUI() {
+      const from = busData.busInfo.from || 'N/A';
+      const to = busData.busInfo.to || 'N/A';
+
+      document.getElementById('busTitle').textContent = `Bus ${busNumber || ''}`.trim();
+      document.getElementById('routeSubtitle').textContent = `${from} → ${to}`;
+
+      document.getElementById('busNumber').textContent = busNumber || '-';
+      document.getElementById('busId').textContent = busData.busInfo.busId || 'N/A';
+      document.getElementById('driverName').textContent = busData.busInfo.driverName || 'N/A';
+      document.getElementById('fromLocation').textContent = from;
+      document.getElementById('toLocation').textContent = to;
+
+      // Status
+      const statusIndicator = document.getElementById('statusIndicator');
+      const statusText = document.getElementById('statusText');
+      const statusBadge = document.getElementById('statusBadge');
+
+      if (busData.status === 'active') {
+        statusIndicator.className = 'status-indicator active';
+        statusText.textContent = 'Active';
+        statusText.style.color = '#4caf50';
+        statusBadge.textContent = 'Live';
+        statusBadge.className = 'badge-live';
+      } else {
+        statusIndicator.className = 'status-indicator inactive';
+        statusText.textContent = 'Inactive';
+        statusText.style.color = '#9e9e9e';
+        statusBadge.textContent = 'Offline';
+        statusBadge.className = 'badge-offline';
+      }
+
+      // Latest location & speed
+      const latestLoc = getLatestLocation(busData.locations);
+      if (latestLoc && typeof latestLoc.speed === 'number') {
+        const speed = (latestLoc.speed * 3.6).toFixed(1);
+        document.getElementById('speedValue').textContent = speed;
+      } else {
+        document.getElementById('speedValue').textContent = '0.0';
+      }
+
+      // Stats: total points
+      const historyArray = Object.values(busData.history);
+      const historyCount = historyArray.length;
+      document.getElementById('totalPoints').textContent = historyCount;
+
+      // Last update (use timestamp if provided, else now)
+      const lastUpdateEl = document.getElementById('lastUpdate');
+      if (latestLoc && latestLoc.timestamp) {
+        const dt = new Date(latestLoc.timestamp);
+        lastUpdateEl.textContent = isNaN(dt.getTime()) ? '-' : dt.toLocaleTimeString();
+      } else if (latestLoc) {
+        const now = new Date();
+        lastUpdateEl.textContent = now.toLocaleTimeString();
+      } else {
+        lastUpdateEl.textContent = '-';
+      }
+
+      // Average speed from history
+      const speeds = historyArray
+        .map(l => typeof l.speed === 'number' ? l.speed * 3.6 : null)
+        .filter(v => v !== null);
+
+      const avgSpeed = speeds.length > 0
+        ? (speeds.reduce((a, b) => a + b, 0) / speeds.length).toFixed(1)
+        : '0.0';
+
+      document.getElementById('avgSpeed').textContent = avgSpeed;
+    }
+
+    // ------------------- Helpers -------------------
+    function getLatestLocation(locations) {
+      if (!locations) return null;
+      const keys = Object.keys(locations);
+      if (keys.length === 0) return null;
+      const lastKey = keys[keys.length - 1];
+      return locations[lastKey];
+    }
+
+    // ------------------- Live map update -------------------
+    function updateLiveMap() {
+      const locValues = Object.values(busData.locations);
+      const recentLocs = locValues.slice(-10);
+
+      if (recentLocs.length === 0) {
+        return;
+      }
+
+      const latestLoc = recentLocs[recentLocs.length - 1];
+
+      // Remove old marker/polyline
+      if (liveMarker) {
+        liveMap.removeLayer(liveMarker);
+      }
+      if (livePolyline) {
+        liveMap.removeLayer(livePolyline);
+      }
+
+      // Marker
+      liveMarker = L.marker([latestLoc.lat, latestLoc.lon]).addTo(liveMap);
+      liveMarker.bindPopup(`
+      <b>${busNumber}</b><br/>
+      Speed: ${(latestLoc.speed * 3.6).toFixed(1)} km/h<br/>
+      Location: ${latestLoc.lat.toFixed(6)}, ${latestLoc.lon.toFixed(6)}
+    `);
+
+      // Trail
+      const coords = recentLocs.map(l => [l.lat, l.lon]);
+      livePolyline = L.polyline(coords, { weight: 4 }).addTo(liveMap);
+
+      liveMap.fitBounds(livePolyline.getBounds(), { padding: [40, 40] });
+    }
+
+    // ------------------- History loading -------------------
+    function loadHistory(filter, buttonEl) {
+      // Update button states
+      document.querySelectorAll('.history-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      if (buttonEl) {
+        buttonEl.classList.add('active');
+      }
+
+      // Clear existing shapes
+      if (historyPolyline) {
+        historyMap.removeLayer(historyPolyline);
+        historyPolyline = null;
+      }
+      if (historyStartMarker) {
+        historyMap.removeLayer(historyStartMarker);
+        historyStartMarker = null;
+      }
+      if (historyEndMarker) {
+        historyMap.removeLayer(historyEndMarker);
+        historyEndMarker = null;
+      }
+
+      let historyData = Object.values(busData.history);
+
+      if (historyData.length === 0) {
+        pageMessageEl.textContent = 'No history data available for this bus.';
+        pageMessageEl.className = 'message info';
+        pageMessageEl.style.display = 'block';
+        return;
+      } else {
+        pageMessageEl.style.display = 'none';
+      }
+
+      if (filter === 'recent') {
+        historyData = historyData.slice(-100);
+      } else if (filter === 'today') {
+        // If you store timestamps in historyData, you can filter by date here.
+        // For now, show all (same as "all") to avoid breaking anything.
+      }
+
+      if (historyData.length < 2) {
+        pageMessageEl.textContent = 'Not enough history points to draw a route.';
+        pageMessageEl.className = 'message info';
+        pageMessageEl.style.display = 'block';
+        return;
+      }
+
+      const coords = historyData.map(l => [l.lat, l.lon]);
+      historyPolyline = L.polyline(coords, { weight: 3 }).addTo(historyMap);
+
+      // Start marker
+      historyStartMarker = L.marker(coords[0], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(historyMap);
+      historyStartMarker.bindPopup('Start Point');
+
+      // End marker
+      historyEndMarker = L.marker(coords[coords.length - 1], {
+        icon: L.icon({
+          iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+          popupAnchor: [1, -34],
+          shadowSize: [41, 41]
+        })
+      }).addTo(historyMap);
+      historyEndMarker.bindPopup('End Point');
+
+      historyMap.fitBounds(historyPolyline.getBounds(), { padding: [40, 40] });
+    }
+
+    // ------------------- Boot -------------------
+    initMaps();
+    if (busNumber) {
+      loadBusData();
+    }
+  </script>
+
+</body>
+
+</html>

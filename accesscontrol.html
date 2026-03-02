@@ -1,0 +1,876 @@
+<!-- Access Control (Bus Live Location) -->
+<div id="accessControlAppEWU">
+  <style>
+ 
+  /* Scope everything */
+  #accessControlAppEWU {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+  }
+
+  /* Layout */
+  #accessControlAppEWU .ac-wrap {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Card */
+  #accessControlAppEWU .ac-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+
+  /* Header */
+  #accessControlAppEWU .ac-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  #accessControlAppEWU .ac-title h2 {
+    font-size: 22px;
+    color: #333;
+    margin-bottom: 5px;
+  }
+
+  #accessControlAppEWU .ac-title p {
+    font-size: 14px;
+    color: #666;
+  }
+
+  /* Row */
+  #accessControlAppEWU .ac-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 15px;
+    align-items: center;
+  }
+
+  /* Search */
+  #accessControlAppEWU input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    outline: none;
+  }
+
+  #accessControlAppEWU input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,0.15);
+  }
+
+  /* KPI */
+  #accessControlAppEWU .kpis {
+    display: flex;
+    gap: 15px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  #accessControlAppEWU .kpi b {
+    color: #667eea;
+  }
+
+  /* Tabs */
+  #accessControlAppEWU .tabs {
+    display: flex;
+    gap: 5px;
+    margin-left: auto;
+  }
+
+  #accessControlAppEWU .tab {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    color: #666;
+    border-bottom: 3px solid transparent;
+    transition: 0.3s;
+  }
+
+  #accessControlAppEWU .tab:hover {
+    background: #f9f9f9;
+    color: #667eea;
+  }
+
+  #accessControlAppEWU .tab.active {
+    color: #667eea;
+    border-bottom-color: #667eea;
+    background: #f9f9ff;
+  }
+
+  /* Tables */
+  #accessControlAppEWU table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+  }
+
+  #accessControlAppEWU th,
+  #accessControlAppEWU td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+    font-size: 14px;
+  }
+
+  #accessControlAppEWU th {
+    background: #f5f7fa;
+    font-weight: 600;
+    color: #666;
+  }
+
+  #accessControlAppEWU tr:hover {
+    background: #f9f9f9;
+  }
+
+  /* Pills */
+  #accessControlAppEWU .pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  #accessControlAppEWU .pill.yes {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  #accessControlAppEWU .pill.no {
+    background: #fafafa;
+    color: #757575;
+  }
+
+  /* Buttons */
+  #accessControlAppEWU .btn {
+    padding: 8px 14px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  #accessControlAppEWU .btn.primary,
+  #accessControlAppEWU .btn.approve {
+    background: #667eea;
+    color: #fff;
+  }
+
+  #accessControlAppEWU .btn.primary:hover,
+  #accessControlAppEWU .btn.approve:hover {
+    background: #5568d3;
+  }
+
+  #accessControlAppEWU .btn.reject,
+  #accessControlAppEWU .btn.revoke {
+    background: #f44336;
+    color: #fff;
+  }
+
+  #accessControlAppEWU .btn.reject:hover,
+  #accessControlAppEWU .btn.revoke:hover {
+    background: #da190b;
+  }
+
+  #accessControlAppEWU .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  /* Bus Cards Grid */
+  #accessControlAppEWU .bus-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+
+  #accessControlAppEWU .bus-card {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    transition: all 0.3s;
+    cursor: pointer;
+    position: relative;
+  }
+
+  #accessControlAppEWU .bus-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 4px 12px rgba(102,126,234,0.2);
+    transform: translateY(-2px);
+  }
+
+  #accessControlAppEWU .bus-card.selected {
+    border-color: #667eea;
+    background: #f9f9ff;
+  }
+
+  #accessControlAppEWU .bus-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  #accessControlAppEWU .bus-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: #667eea;
+  }
+
+  #accessControlAppEWU .bus-status {
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  #accessControlAppEWU .bus-status.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+
+  #accessControlAppEWU .bus-status.inactive {
+    background: #fafafa;
+    color: #757575;
+  }
+
+  #accessControlAppEWU .bus-info {
+    margin-top: 10px;
+  }
+
+  #accessControlAppEWU .bus-info-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #666;
+  }
+
+  #accessControlAppEWU .bus-info-label {
+    font-weight: 600;
+    margin-right: 8px;
+    color: #333;
+  }
+
+  #accessControlAppEWU .checkmark {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 24px;
+    height: 24px;
+    background: #667eea;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 14px;
+  }
+
+  #accessControlAppEWU .bus-card.selected .checkmark {
+    display: flex;
+  }
+
+  #accessControlAppEWU .email-input-section {
+    background: #f5f7fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+
+  #accessControlAppEWU .email-input-section.hidden {
+    display: none;
+  }
+
+  /* Success Message */
+  #accessControlAppEWU .success-message {
+    background: #e8f5e9;
+    border: 2px solid #4caf50;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: none;
+    animation: slideIn 0.3s ease-out;
+  }
+
+  #accessControlAppEWU .success-message.show {
+    display: block;
+  }
+
+  #accessControlAppEWU .success-message-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+  }
+
+  #accessControlAppEWU .success-icon {
+    width: 40px;
+    height: 40px;
+    background: #4caf50;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bold;
+  }
+
+  #accessControlAppEWU .success-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #2e7d32;
+  }
+
+  #accessControlAppEWU .success-details {
+    background: #fff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+  }
+
+  #accessControlAppEWU .success-detail-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #e0e0e0;
+  }
+
+  #accessControlAppEWU .success-detail-row:last-child {
+    border-bottom: none;
+  }
+
+  #accessControlAppEWU .success-detail-label {
+    font-weight: 600;
+    color: #666;
+  }
+
+  #accessControlAppEWU .success-detail-value {
+    color: #333;
+    font-weight: 500;
+  }
+
+  #accessControlAppEWU .success-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Helpers */
+  #accessControlAppEWU .loading {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+  }
+
+  #accessControlAppEWU .muted {
+    color: #666;
+  }
+
+  #accessControlAppEWU .small {
+    font-size: 13px;
+  }
+
+  #accessControlAppEWU .ac-hide {
+    display: none;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    #accessControlAppEWU .tabs {
+      width: 100%;
+      margin-left: 0;
+    }
+
+    #accessControlAppEWU .bus-cards-grid {
+      grid-template-columns: 1fr;
+    }
+
+    #accessControlAppEWU .success-actions {
+      flex-direction: column;
+    }
+
+    #accessControlAppEWU .success-actions .btn {
+      width: 100%;
+    }
+  }
+</style>
+
+
+
+  <div class="ac-wrap">
+    <div class="ac-card">
+      <div class="ac-header">
+        <div class="ac-title">
+          <h2>Approve or manage Gmail access for live location of buses.</h2>
+        </div>
+      </div>
+
+      <div class="ac-row">
+        <div class="ac-search">
+          <input id="ac_search" placeholder="Search by email or bus..." />
+        </div>
+
+        <div class="kpis">
+          <div class="kpi">Pending: <b id="ac_kpiPending">0</b></div>
+          <div class="kpi">Users: <b id="ac_kpiUsers">0</b></div>
+        </div>
+
+        <div class="tabs">
+          <div class="tab active" data-tab="ac_tab_req">Requests</div>
+          <div class="tab" data-tab="ac_tab_users">Users</div>
+          <div class="tab" data-tab="ac_tab_add">Add Email</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REQUESTS -->
+    <div id="ac_tab_req" class="ac-card">
+      <div class="ac-section-title">Pending Access Requests</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Bus</th>
+            <th>Requested At</th>
+            <th>UID</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ac_reqBody">
+          <tr><td colspan="5" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- USERS -->
+    <div id="ac_tab_users" class="ac-card ac-hide">
+      <div class="ac-section-title">Users (Allowlist)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Buses Allowed</th>
+            <th>Status</th>
+            <th>Granted At</th>
+            <th>Last Login</th>
+            <th>UID</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ac_usersBody">
+          <tr><td colspan="7" class="loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ADD -->
+    <div id="ac_tab_add" class="ac-card ac-hide">
+      <div class="ac-section-title">Add Email / Bus Access</div>
+      
+      <!-- Success Message -->
+      <div class="success-message" id="ac_successMessage">
+        <div class="success-message-header">
+          <div class="success-icon">✓</div>
+          <div class="success-title">Access Granted Successfully!</div>
+        </div>
+        <div class="success-details">
+          <div class="success-detail-row">
+            <span class="success-detail-label">Email:</span>
+            <span class="success-detail-value" id="ac_successEmail">-</span>
+          </div>
+          <div class="success-detail-row">
+            <span class="success-detail-label">Bus Number:</span>
+            <span class="success-detail-value" id="ac_successBus">-</span>
+          </div>
+          <div class="success-detail-row">
+            <span class="success-detail-label">Granted At:</span>
+            <span class="success-detail-value" id="ac_successTime">-</span>
+          </div>
+        </div>
+        <div class="success-actions">
+          <button class="btn primary" id="ac_btnAddAnother">➕ Add Another Email</button>
+          <button class="btn approve" id="ac_btnViewUsers">👥 View All Users</button>
+          <button class="btn reject" id="ac_btnDismiss">✕ Dismiss</button>
+        </div>
+      </div>
+
+      <!-- Email Input Section (Shows after bus selection) -->
+      <div class="email-input-section hidden" id="ac_emailInputSection">
+        <div style="margin-bottom: 15px;">
+          <strong>Selected Bus:</strong> <span id="ac_selectedBusDisplay" style="color: #667eea; font-size: 16px;"></span>
+        </div>
+        <div class="ac-row">
+          <div style="flex:1; min-width:200px;">
+            <input id="ac_directEmail" placeholder="Enter email (e.g. abc@gmail.com)" />
+          </div>
+          <button class="btn primary" id="ac_btnAddDirect">➕ Grant Access</button>
+          <button class="btn reject" id="ac_btnCancelSelection">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Search for buses -->
+      <div id="ac_busSearchSection">
+        <div style="margin-bottom: 15px;">
+          <input id="ac_busSearch" placeholder="Search buses by number, driver name, or route..." />
+        </div>
+
+        <div class="muted small" style="margin-bottom: 15px;">
+          Click on a bus card below to add email access:
+        </div>
+
+        <!-- Bus Cards Grid -->
+        <div class="bus-cards-grid" id="ac_busCardsGrid">
+          <div class="loading">Loading buses...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      if (window.__AC_EWU_INITED__) return;
+      window.__AC_EWU_INITED__ = true;
+
+      if (!window.firebase || !firebase.database) return;
+
+      const db = firebase.database();
+      const reqRef = db.ref("access_requests");
+      const busAccessRef = db.ref("bus_access");
+      const driverLocationRef = db.ref("driver_location/private_bus");
+
+      const reqBody = document.getElementById("ac_reqBody");
+      const usersBody = document.getElementById("ac_usersBody");
+      const searchInp = document.getElementById("ac_search");
+      const kpiPending = document.getElementById("ac_kpiPending");
+      const kpiUsers = document.getElementById("ac_kpiUsers");
+      const directEmail = document.getElementById("ac_directEmail");
+      const btnAddDirect = document.getElementById("ac_btnAddDirect");
+      const busCardsGrid = document.getElementById("ac_busCardsGrid");
+      const busSearchInp = document.getElementById("ac_busSearch");
+      const emailInputSection = document.getElementById("ac_emailInputSection");
+      const busSearchSection = document.getElementById("ac_busSearchSection");
+      const selectedBusDisplay = document.getElementById("ac_selectedBusDisplay");
+      const btnCancelSelection = document.getElementById("ac_btnCancelSelection");
+      
+      // Success message elements
+      const successMessage = document.getElementById("ac_successMessage");
+      const successEmail = document.getElementById("ac_successEmail");
+      const successBus = document.getElementById("ac_successBus");
+      const successTime = document.getElementById("ac_successTime");
+      const btnAddAnother = document.getElementById("ac_btnAddAnother");
+      const btnViewUsers = document.getElementById("ac_btnViewUsers");
+      const btnDismiss = document.getElementById("ac_btnDismiss");
+
+      const normEmail = s => (s || "").trim().toLowerCase();
+      const emailKey = e => normEmail(e).replace(/[.#$\[\]]/g, "_");
+      const fmt = ts => ts ? new Date(ts).toLocaleString() : "—";
+
+      let selectedBusNumber = null;
+      let privateBuses = {};
+
+      const tabs = document.querySelectorAll("#accessControlAppEWU .tab");
+      tabs.forEach(t => t.addEventListener("click", () => {
+        tabs.forEach(x => x.classList.remove("active"));
+        t.classList.add("active");
+        const id = t.dataset.tab;
+        document.getElementById("ac_tab_req").classList.add("ac-hide");
+        document.getElementById("ac_tab_users").classList.add("ac-hide");
+        document.getElementById("ac_tab_add").classList.add("ac-hide");
+        document.getElementById(id).classList.remove("ac-hide");
+      }));
+
+      let cacheReq = {};
+      let cacheAccess = {};
+
+      // Render Requests
+      function renderRequests() {
+        const rows = Object.values(cacheReq || {})
+          .filter(r => r.status === "pending")
+          .filter(r => !searchInp.value || r.email.includes(searchInp.value) || r.busNumber.includes(searchInp.value));
+
+        kpiPending.textContent = rows.length;
+
+        reqBody.innerHTML = rows.length ? rows.map(r => `
+          <tr>
+            <td>${r.email}</td>
+            <td>${r.busNumber}</td>
+            <td>${fmt(r.requestedAt)}</td>
+            <td class="uid">${r.uid || "—"}</td>
+            <td>
+              <button class="btn approve" data-act="approve" data-email="${r.email}" data-bus="${r.busNumber}" data-uid="${r.uid}">Approve</button>
+              <button class="btn reject" data-act="reject" data-uid="${r.uid}">Reject</button>
+              <button class="btn reject" data-act="deleteReq" data-uid="${r.uid}">Delete</button>
+            </td>
+          </tr>`).join("") : `<tr><td colspan="5" class="loading">No pending requests</td></tr>`;
+      }
+
+      // Render Users
+      function renderUsers() {
+        const entries = Object.entries(cacheAccess || {})
+          .filter(([bus, emails]) => {
+            return Object.keys(emails || {}).some(email => !searchInp.value || email.includes(searchInp.value));
+          });
+
+        // ✅ Count total users across all buses
+        const totalUsers = entries.reduce((sum, [bus, emails]) => {
+          return sum + Object.keys(emails || {}).length;
+        }, 0);
+        
+        kpiUsers.textContent = totalUsers;
+
+        usersBody.innerHTML = entries.length ? entries.map(([bus, emails]) => {
+          return Object.entries(emails).map(([email, data]) => `
+            <tr>
+              <td>${email}</td>
+              <td>${bus}</td>
+              <td><span class="pill ${data.authorized ? "yes":"no"}">${data.authorized?"YES":"NO"}</span></td>
+              <td>${fmt(data.grantedAt)}</td>
+              <td>${fmt(data.lastLogin)}</td>
+              <td>${data.uid||"—"}</td>
+              <td>
+                ${data.authorized? `<button class="btn revoke" data-act="revokeUser" data-bus="${bus}" data-email="${email}">Revoke</button>`:
+                  `<button class="btn approve" data-act="grantUser" data-bus="${bus}" data-email="${email}">Grant</button>`}
+              </td>
+            </tr>`).join("");
+        }).join("") : `<tr><td colspan="7" class="loading">No users</td></tr>`;
+      }
+
+      function renderAll() { renderRequests(); renderUsers(); }
+
+      // Render Bus Cards
+      function renderBusCards() {
+        const searchTerm = busSearchInp.value.toLowerCase();
+        const filtered = Object.entries(privateBuses).filter(([busNum, data]) => {
+          const driverName = data.Bus_Info?.driverName || "";
+          const from = data.Bus_Info?.from || "";
+          const to = data.Bus_Info?.to || "";
+          return busNum.toLowerCase().includes(searchTerm) || 
+                 driverName.toLowerCase().includes(searchTerm) ||
+                 from.toLowerCase().includes(searchTerm) ||
+                 to.toLowerCase().includes(searchTerm);
+        });
+
+        if (filtered.length === 0) {
+          busCardsGrid.innerHTML = '<div class="loading">No buses found</div>';
+          return;
+        }
+
+        busCardsGrid.innerHTML = filtered.map(([busNum, data]) => {
+          const info = data.Bus_Info || {};
+          const status = data.status || "inactive";
+          
+          return `
+            <div class="bus-card" data-bus="${busNum}">
+              <div class="checkmark">✓</div>
+              <div class="bus-card-header">
+                <div class="bus-number">${busNum}</div>
+                <div class="bus-status ${status}">${status.toUpperCase()}</div>
+              </div>
+              <div class="bus-info">
+                <div class="bus-info-row">
+                  <span class="bus-info-label">Driver:</span>
+                  <span>${info.driverName || "N/A"}</span>
+                </div>
+                <div class="bus-info-row">
+                  <span class="bus-info-label">Route:</span>
+                  <span>${info.from || "N/A"} → ${info.to || "N/A"}</span>
+                </div>
+                <div class="bus-info-row">
+                  <span class="bus-info-label">Bus ID:</span>
+                  <span>${info.busId || "N/A"}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        // Add click handlers to bus cards
+        document.querySelectorAll(".bus-card").forEach(card => {
+          card.addEventListener("click", () => {
+            const busNum = card.dataset.bus;
+            selectBus(busNum);
+          });
+        });
+      }
+
+      // Select a bus
+      function selectBus(busNum) {
+        selectedBusNumber = busNum;
+        selectedBusDisplay.textContent = busNum;
+        
+        // Hide success message and bus selection, show email input
+        successMessage.classList.remove("show");
+        busSearchSection.style.display = "none";
+        emailInputSection.classList.remove("hidden");
+        
+        // Focus on email input
+        setTimeout(() => directEmail.focus(), 100);
+      }
+
+      // Show success message
+      function showSuccess(email, busNumber) {
+        successEmail.textContent = email;
+        successBus.textContent = busNumber;
+        successTime.textContent = new Date().toLocaleString();
+        
+        // Hide input sections, show success
+        emailInputSection.classList.add("hidden");
+        busSearchSection.style.display = "none";
+        successMessage.classList.add("show");
+        
+        // Scroll to success message
+        successMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      // Cancel bus selection
+      btnCancelSelection.addEventListener("click", () => {
+        selectedBusNumber = null;
+        directEmail.value = "";
+        emailInputSection.classList.add("hidden");
+        successMessage.classList.remove("show");
+        busSearchSection.style.display = "block";
+      });
+
+      // Add another email (reset to bus selection)
+      btnAddAnother.addEventListener("click", () => {
+        selectedBusNumber = null;
+        directEmail.value = "";
+        successMessage.classList.remove("show");
+        emailInputSection.classList.add("hidden");
+        busSearchSection.style.display = "block";
+        busSearchInp.focus();
+      });
+
+      // View all users
+      btnViewUsers.addEventListener("click", () => {
+        document.querySelector('.tab[data-tab="ac_tab_users"]').click();
+      });
+
+      // Dismiss success message
+      btnDismiss.addEventListener("click", () => {
+        successMessage.classList.remove("show");
+        busSearchSection.style.display = "block";
+      });
+
+      // Load private buses
+      driverLocationRef.on("value", snap => {
+        privateBuses = snap.val() || {};
+        renderBusCards();
+      });
+
+      // Search buses
+      busSearchInp.addEventListener("input", renderBusCards);
+
+      // Firebase listeners
+      reqRef.on("value", snap => { cacheReq = snap.val() || {}; renderRequests(); });
+      busAccessRef.on("value", snap => { cacheAccess = snap.val() || {}; renderUsers(); });
+
+      searchInp.addEventListener("input", renderAll);
+
+      // Button actions
+      document.getElementById("accessControlAppEWU").addEventListener("click", async e => {
+        const btn = e.target.closest("button[data-act]");
+        if (!btn) return;
+        const act = btn.dataset.act;
+
+        try {
+          const bus = btn.dataset.bus;
+          const email = normEmail(btn.dataset.email);
+          const uid = btn.dataset.uid;
+
+          if (act === "approve" && bus && email) {
+            await db.ref(`bus_access/${bus}/${emailKey(email)}`).set({
+              email, authorized: true, grantedAt: Date.now(), uid
+            });
+            if (uid) await db.ref(`access_requests/${uid}`).update({ status:"approved", decidedAt:Date.now() });
+          } else if (act === "reject" && uid) {
+            await db.ref(`access_requests/${uid}`).update({ status:"rejected", decidedAt:Date.now() });
+          } else if (act === "deleteReq" && uid) {
+            await db.ref(`access_requests/${uid}`).remove();
+          } else if ((act === "revokeUser" || act === "grantUser") && bus && email) {
+            await db.ref(`bus_access/${bus}/${emailKey(email)}`).update({ authorized: act==="grantUser", grantedAt: Date.now() });
+          }
+        } catch(err) { alert(err.message || err); }
+      });
+
+      // Direct add with selected bus
+      btnAddDirect.addEventListener("click", async () => {
+        const e = normEmail(directEmail.value);
+        if (!e) return alert("Please enter an email address.");
+        if (!selectedBusNumber) return alert("Please select a bus first.");
+        
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(e)) {
+          return alert("Please enter a valid email address.");
+        }
+
+        // Disable button during operation
+        btnAddDirect.disabled = true;
+        btnAddDirect.textContent = "Granting Access...";
+        
+        try {
+          await db.ref(`bus_access/${selectedBusNumber}/${emailKey(e)}`).set({ 
+            email: e, 
+            authorized: true, 
+            grantedAt: Date.now() 
+          });
+          
+          // Show success message
+          showSuccess(e, selectedBusNumber);
+          
+          // Reset email input
+          directEmail.value = "";
+          
+          // ✅ Clear the top search bar
+          searchInp.value = "";
+          
+          // ✅ Trigger render to update the display
+          renderAll();
+          
+          selectedBusNumber = null;
+          
+        } catch(err) {
+          alert("Error: " + (err.message || err));
+          console.error(err);
+        } finally {
+          // Re-enable button
+          btnAddDirect.disabled = false;
+          btnAddDirect.textContent = "➕ Grant Access";
+        }
+      });
+
+      // Allow Enter key to submit
+      directEmail.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          btnAddDirect.click();
+        }
+      });
+
+    })();
+  </script>
+</div>

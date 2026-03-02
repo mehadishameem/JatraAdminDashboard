@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EWU Bus Management System</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f7fa;
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px 40px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-logo {
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .header-text {
+      flex: 1;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 5px;
+    }
+
+    /* Navigation */
+    .nav-tabs {
+      background: white;
+      padding: 0 40px;
+      border-bottom: 2px solid #e0e0e0;
+      display: flex;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+
+    .nav-tab {
+      padding: 15px 25px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+      font-weight: 500;
+      color: #666;
+      user-select: none;
+    }
+
+    .nav-tab:hover {
+      background: #f9f9f9;
+      color: #667eea;
+    }
+
+    .nav-tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+      background: #f9f9ff;
+    }
+
+    /* Container */
+    .container {
+      padding: 30px 40px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* Tabs */
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Dashboard Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-card h3 {
+      font-size: 32px;
+      color: #667eea;
+      margin-bottom: 5px;
+    }
+
+    .stat-card p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    /* Bus Grid */
+    .bus-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .bus-tile {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+    }
+
+    .bus-tile:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border-color: #667eea;
+    }
+
+    .bus-tile.active {
+      border-left: 5px solid #4caf50;
+    }
+
+    .bus-tile.inactive {
+      border-left: 5px solid #e0e0e0;
+      opacity: 0.7;
+    }
+
+    .bus-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .bus-number {
+      font-size: 22px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .status-badge {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-badge.active {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+
+    .status-badge.inactive {
+      background: #fafafa;
+      color: #757575;
+    }
+
+    .bus-info {
+      color: #666;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .bus-info-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      gap: 16px;
+    }
+
+    .bus-info-label {
+      font-weight: 600;
+      color: #888;
+    }
+
+    .bus-info-value {
+      color: #333;
+      text-align: right;
+    }
+
+    .view-details-btn {
+      width: 100%;
+      margin-top: 15px;
+      padding: 10px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .view-details-btn:hover {
+      background: #5568d3;
+    }
+
+    /* Map */
+    #overviewMap {
+      height: 500px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    /* CRUD Section */
+    .crud-section {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .crud-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .crud-btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .crud-btn.add {
+      background: #4caf50;
+      color: white;
+    }
+
+    .crud-btn.add:hover {
+      background: #45a049;
+    }
+
+    .crud-btn.edit {
+      background: #2196f3;
+      color: white;
+    }
+
+    .crud-btn.edit:hover {
+      background: #0b7dda;
+    }
+
+    .crud-btn.delete {
+      background: #f44336;
+      color: white;
+    }
+
+    .crud-btn.delete:hover {
+      background: #da190b;
+    }
+
+    .bus-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .bus-table th,
+    .bus-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .bus-table th {
+      background: #f5f7fa;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .bus-table tr:hover {
+      background: #f9f9f9;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 520px;
+      width: 92%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #333;
+    }
+
+    .modal-sub {
+      color: #666;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: #666;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .form-group input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .form-actions button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    .btn-submit {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-submit:hover {
+      background: #5568d3;
+    }
+
+    .btn-cancel {
+      background: #e0e0e0;
+      color: #666;
+    }
+
+    .btn-cancel:hover {
+      background: #d0d0d0;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #666;
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        padding: 16px;
+      }
+
+      .header-logo {
+        width: 50px;
+        height: 50px;
+      }
+
+      .header h1 {
+        font-size: 22px;
+      }
+
+      .nav-tabs {
+        padding: 0 16px;
+      }
+
+      .container {
+        padding: 20px 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="header-logo">
+      <!-- Replace this src with your actual EWU logo path -->
+      <img src="ewu-logo.png" alt="EWU Logo" id="ewuLogo">
+    </div>
+    <div class="header-text">
+      <h1>EWU Transport System</h1>
+    </div>
+  </div>
+
+  <div class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="accesscontrol">Access Control</div>
+    <div class="nav-tab" data-tab="map">Live Map</div>
+    <div class="nav-tab" data-tab="management">Car Management</div>
+  </div>
+
+  <div class="container">
+
+    <!-- Dashboard -->
+    <div class="tab-content active" id="dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3 id="totalBuses">0</h3>
+          <p>Total Cars</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="activeBuses">0</h3>
+          <p>Active Cars</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="inactiveBuses">0</h3>
+          <p>Inactive Cars</p>
+        </div>
+        <div class="stat-card">
+          <h3 id="avgSpeed">0</h3>
+          <p>Avg Speed (km/h)</p>
+        </div>
+      </div>
+
+      <h2 style="margin-bottom: 20px; color: #333;">All Cars</h2>
+      <div class="bus-grid" id="busGrid">
+        <div class="loading">Loading buses...</div>
+      </div>
+    </div>
+
+    <!-- Access Control -->
+    <div class="tab-content" id="accesscontrol">
+      <div id="accessControlMount">
+        <div class="loading">Loading Access Control...</div>
+      </div>
+    </div>
+
+    <!-- Map -->
+    <div class="tab-content" id="map">
+      <div id="overviewMap"></div>
+    </div>
+
+    <!-- Management -->
+    <div class="tab-content" id="management">
+      <div class="crud-section">
+        <h2 style="margin-bottom: 20px; color: #333;">Car Management</h2>
+        <div class="crud-controls">
+          <button class="crud-btn add" onclick="openAddModal()">➕ Add New Car</button>
+        </div>
+
+        <table class="bus-table" id="managementTable">
+          <thead>
+            <tr>
+              <th>Car Number</th>
+              <th>Driver</th>
+              <th>Mobile</th>
+              <th>Route (From → To)</th>
+              <th>Car ID</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="managementTableBody">
+            <tr>
+              <td colspan="7" class="loading">Loading...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" id="busModal">
+    <div class="modal-content">
+      <div class="modal-header" id="modalTitle">Add New Car</div>
+      <div class="modal-sub" id="modalSub">Create a new car entry.</div>
+
+      <form id="busForm">
+        <div class="form-group">
+          <label>Car Number *</label>
+          <input type="text" id="busNumber" required />
+        </div>
+
+        <div class="form-group">
+          <label>Driver Name *</label>
+          <input type="text" id="driverName" required />
+        </div>
+
+        <div class="form-group">
+          <label>Mobile *</label>
+          <input type="text" id="mobile" required placeholder="e.g. 01XXXXXXXXX" />
+        </div>
+
+        <div class="form-group">
+          <label>From *</label>
+          <input type="text" id="fromLocation" required />
+        </div>
+
+        <div class="form-group">
+          <label>To *</label>
+          <input type="text" id="toLocation" required />
+        </div>
+
+        <div class="form-group">
+          <label>Bus ID *</label>
+          <input type="text" id="busId" required />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-submit">Save Car</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Firebase (compat) -->
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    /***********************
+     * Logo fallback
+     ***********************/
+    document.getElementById('ewuLogo').onerror = function () {
+      // If logo fails to load, show placeholder
+      this.style.display = 'none';
+      this.parentElement.innerHTML = '<div style="font-size: 24px; font-weight: bold; color: #667eea;">EWU</div>';
+    };
+
+    /***********************
+     * Firebase INIT ONCE
+     ***********************/
+    const firebaseConfig = {
+      databaseURL: "https://ewubdcapstonelocalbus-default-rtdb.firebaseio.com/"
+    };
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    /***********************
+     * Globals
+     ***********************/
+    let busesData = {};
+    let map = null;
+    let busMarkers = {};
+    let editingBusKey = null; // old bus key (previous bus number)
+    let accessControlLoaded = false;
+    // Prefetch access control content immediately
+    let accessControlPromise = fetch("accesscontrol.html").then(r => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.text();
+    });
+
+    /***********************
+     * Tabs
+     ***********************/
+    document.querySelectorAll(".nav-tab").forEach(tab => {
+      tab.addEventListener("click", function () {
+        document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+        document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+        this.classList.add("active");
+        document.getElementById(this.dataset.tab).classList.add("active");
+
+        if (this.dataset.tab === "map") {
+          if (!map) initMap();
+          setTimeout(() => map && map.invalidateSize(), 50);
+        }
+
+        if (this.dataset.tab === "accesscontrol") {
+          loadAccessControlTab();
+        }
+      });
+    });
+
+    /***********************
+     * Access Control embed
+     ***********************/
+    async function loadAccessControlTab() {
+      const mount = document.getElementById("accessControlMount");
+      if (!mount) return;
+
+      if (accessControlLoaded) return;
+
+      try {
+        mount.innerHTML = '<div class="loading">Loading Access Control...</div>';
+        const html = await accessControlPromise;
+        mount.innerHTML = html;
+        runScriptsInside(mount);
+        accessControlLoaded = true;
+      } catch (err) {
+        mount.innerHTML = `<div class="loading">Failed to load Access Control: ${err.message}</div>`;
+      }
+    }
+
+    function runScriptsInside(container) {
+      container.querySelectorAll("script").forEach(oldScript => {
+        const s = document.createElement("script");
+        [...oldScript.attributes].forEach(attr => s.setAttribute(attr.name, attr.value));
+        if (!oldScript.src) s.textContent = oldScript.textContent;
+        oldScript.replaceWith(s);
+      });
+    }
+
+    /***********************
+     * Map
+     ***********************/
+    function initMap() {
+      map = L.map("overviewMap").setView([23.8103, 90.4125], 12);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; OpenStreetMap contributors"
+      }).addTo(map);
+      loadBusesOnMap();
+    }
+
+    /***********************
+     * Load buses (live)
+     ***********************/
+    function loadAllBuses() {
+      // Check if we're returning from details page
+      const cachedData = sessionStorage.getItem('busesDataCache');
+      const cachedScrollPos = sessionStorage.getItem('scrollPosition');
+
+      if (cachedData && performance.navigation.type === 2) {
+        // Restore from cache on back navigation
+        busesData = JSON.parse(cachedData);
+        renderDashboard();
+        renderManagementTable();
+        if (map) loadBusesOnMap();
+
+        // Restore scroll position
+        if (cachedScrollPos) {
+          window.scrollTo(0, parseInt(cachedScrollPos));
+        }
+      }
+
+      db.ref("driver_location/private_bus").on("value", snapshot => {
+        busesData = {};
+
+        snapshot.forEach(bus => {
+          const busKey = bus.key;
+
+          const busInfo = bus.child("Bus_Info").val() || {};
+          const status = bus.child("status").val() || "inactive";
+          const locations = bus.child("locations").val() || {};
+          const latestLoc = getLatestLocation(locations);
+
+          busesData[busKey] = {
+            busNumber: busKey,
+            driverName: busInfo.driverName || "N/A",
+            mobile: busInfo.mobile || "N/A",
+            from: busInfo.from || "N/A",
+            to: busInfo.to || "N/A",
+            busId: busInfo.busId || "N/A",
+            status,
+            latitude: latestLoc && latestLoc.lat != null ? latestLoc.lat : null,
+            longitude: latestLoc && latestLoc.lon != null ? latestLoc.lon : null,
+            speed: latestLoc && latestLoc.speed != null ? latestLoc.speed : 0
+          };
+        });
+
+        // Cache the data
+        sessionStorage.setItem('busesDataCache', JSON.stringify(busesData));
+
+        renderDashboard();
+        renderManagementTable();
+        if (map) loadBusesOnMap();
+      });
+    }
+
+    function getLatestLocation(locations) {
+      if (!locations) return null;
+      const keys = Object.keys(locations);
+      if (keys.length === 0) return null;
+      return locations[keys[keys.length - 1]];
+    }
+
+    /***********************
+     * Helpers
+     ***********************/
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+    function escapeJs(str) {
+      return String(str ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    /***********************
+     * Dashboard
+     ***********************/
+    function renderDashboard() {
+      const buses = Object.values(busesData);
+      const activeBuses = buses.filter(b => b.status === "active");
+
+      document.getElementById("totalBuses").textContent = String(buses.length);
+      document.getElementById("activeBuses").textContent = String(activeBuses.length);
+      document.getElementById("inactiveBuses").textContent = String(buses.length - activeBuses.length);
+
+      const avgSpeed = activeBuses.length > 0
+        ? (activeBuses.reduce((sum, b) => sum + (b.speed * 3.6), 0) / activeBuses.length).toFixed(1)
+        : "0";
+      document.getElementById("avgSpeed").textContent = avgSpeed;
+
+      const busGrid = document.getElementById("busGrid");
+      if (buses.length === 0) {
+        busGrid.innerHTML = '<div class="loading">No buses found</div>';
+        return;
+      }
+
+      busGrid.innerHTML = buses.map(bus => `
+        <div class="bus-tile ${bus.status}" onclick="viewBusDetails('${escapeHtml(bus.busNumber)}')">
+          <div class="bus-header">
+            <div class="bus-number">${escapeHtml(bus.busNumber)}</div>
+            <div class="status-badge ${bus.status}">${escapeHtml(bus.status)}</div>
+          </div>
+          <div class="bus-info">
+            <div class="bus-info-row">
+              <span class="bus-info-label">Driver:</span>
+              <span class="bus-info-value">${escapeHtml(bus.driverName)}</span>
+            </div>
+            <div class="bus-info-row">
+              <span class="bus-info-label">Mobile:</span>
+              <span class="bus-info-value">${escapeHtml(bus.mobile)}</span>
+            </div>
+            <div class="bus-info-row">
+              <span class="bus-info-label">Route:</span>
+              <span class="bus-info-value">${escapeHtml(bus.from)} → ${escapeHtml(bus.to)}</span>
+            </div>
+            <div class="bus-info-row">
+              <span class="bus-info-label">Bus ID:</span>
+              <span class="bus-info-value">${escapeHtml(bus.busId)}</span>
+            </div>
+            <div class="bus-info-row">
+              <span class="bus-info-label">Speed:</span>
+              <span class="bus-info-value">${(Number(bus.speed) * 3.6).toFixed(1)} km/h</span>
+            </div>
+          </div>
+          <button class="view-details-btn" type="button">View Details →</button>
+        </div>
+      `).join("");
+    }
+
+    /***********************
+     * Map markers
+     ***********************/
+    function loadBusesOnMap() {
+      if (!map) return;
+
+      Object.values(busMarkers).forEach(marker => map.removeLayer(marker));
+      busMarkers = {};
+
+      Object.values(busesData).forEach(bus => {
+        if (bus.latitude != null && bus.longitude != null) {
+          const marker = L.marker([bus.latitude, bus.longitude]).addTo(map);
+          marker.bindPopup(`
+            <b>${escapeHtml(bus.busNumber)}</b><br>
+            Driver: ${escapeHtml(bus.driverName)}<br>
+            Mobile: ${escapeHtml(bus.mobile)}<br>
+            Route: ${escapeHtml(bus.from)} → ${escapeHtml(bus.to)}<br>
+            Speed: ${(Number(bus.speed) * 3.6).toFixed(1)} km/h<br>
+            Status: ${escapeHtml(bus.status)}
+          `);
+          busMarkers[bus.busNumber] = marker;
+        }
+      });
+
+      const markers = Object.values(busMarkers);
+      if (markers.length > 0) {
+        const group = L.featureGroup(markers);
+        map.fitBounds(group.getBounds(), { padding: [50, 50] });
+      }
+    }
+
+    /***********************
+     * Management table
+     ***********************/
+    function renderManagementTable() {
+      const tbody = document.getElementById("managementTableBody");
+      const buses = Object.values(busesData);
+
+      if (buses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="loading">No buses found</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = buses.map(bus => `
+        <tr>
+          <td>${escapeHtml(bus.busNumber)}</td>
+          <td>${escapeHtml(bus.driverName)}</td>
+          <td>${escapeHtml(bus.mobile)}</td>
+          <td>${escapeHtml(bus.from)} → ${escapeHtml(bus.to)}</td>
+          <td>${escapeHtml(bus.busId)}</td>
+          <td><span class="status-badge ${bus.status}">${escapeHtml(bus.status)}</span></td>
+          <td>
+            <button class="crud-btn edit" onclick="openEditModal('${escapeJs(bus.busNumber)}')">Edit</button>
+            <button class="crud-btn delete" onclick="deleteBus('${escapeJs(bus.busNumber)}')">Delete</button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    /***********************
+     * Details
+     ***********************/
+    function viewBusDetails(busNumber) {
+      // Save scroll position before navigating
+      sessionStorage.setItem('scrollPosition', window.pageYOffset.toString());
+      window.location.href = `bus-details.html?bus=${encodeURIComponent(busNumber)}`;
+    }
+    window.viewBusDetails = viewBusDetails;
+
+    /***********************
+     * Modal CRUD (supports rename + mobile)
+     ***********************/
+    function openAddModal() {
+      editingBusKey = null;
+      document.getElementById("modalTitle").textContent = "Add New Car";
+      document.getElementById("modalSub").textContent = "Create a new Car entry.";
+      document.getElementById("busForm").reset();
+      document.getElementById("busModal").classList.add("active");
+      document.getElementById("busNumber").focus();
+    }
+    window.openAddModal = openAddModal;
+
+    function openEditModal(busKey) {
+      const bus = busesData[busKey];
+      if (!bus) return alert("Bus not found.");
+
+      editingBusKey = busKey;
+      document.getElementById("modalTitle").textContent = "Edit Car";
+      document.getElementById("modalSub").textContent = `Editing "${busKey}". You may change Bus Number to rename this bus.`;
+
+      document.getElementById("busNumber").value = bus.busNumber;
+      document.getElementById("driverName").value = bus.driverName;
+      document.getElementById("mobile").value = bus.mobile === "N/A" ? "" : bus.mobile;
+      document.getElementById("fromLocation").value = bus.from;
+      document.getElementById("toLocation").value = bus.to;
+      document.getElementById("busId").value = bus.busId;
+
+      document.getElementById("busModal").classList.add("active");
+      document.getElementById("busNumber").focus();
+    }
+    window.openEditModal = openEditModal;
+
+    function closeModal() {
+      document.getElementById("busModal").classList.remove("active");
+    }
+    window.closeModal = closeModal;
+
+    document.getElementById("busModal").addEventListener("click", (e) => {
+      if (e.target.id === "busModal") closeModal();
+    });
+
+    // Submit (stores Bus_Info.mobile)
+    document.getElementById("busForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const busNumber = document.getElementById("busNumber").value.trim();
+      const driverName = document.getElementById("driverName").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const from = document.getElementById("fromLocation").value.trim();
+      const to = document.getElementById("toLocation").value.trim();
+      const busId = document.getElementById("busId").value.trim();
+
+      if (!busNumber || !driverName || !mobile || !from || !to || !busId) {
+        return alert("Please fill all fields.");
+      }
+
+      // Optional BD number check
+      const bdOk = /^01\d{9}$/.test(mobile);
+      if (!bdOk && !confirm("Mobile format looks unusual. Save anyway?")) return;
+
+      const busInfo = { driverName, mobile, from, to, busId };
+
+      const newKey = busNumber;
+      const oldKey = editingBusKey;
+
+      const newPath = `driver_location/private_bus/${newKey}`;
+      const oldPath = oldKey ? `driver_location/private_bus/${oldKey}` : null;
+
+      try {
+        // ADD
+        if (!oldKey) {
+          const existsSnap = await db.ref(newPath).get();
+          if (existsSnap.exists()) return alert("This bus number already exists!");
+
+          await db.ref(`${newPath}/Bus_Info`).set(busInfo);
+          alert("Bus added successfully!");
+          closeModal();
+          return;
+        }
+
+        // EDIT (no rename)
+        if (oldKey === newKey) {
+          await db.ref(`${newPath}/Bus_Info`).set(busInfo);
+          alert("Bus updated successfully!");
+          closeModal();
+          return;
+        }
+
+        // RENAME
+        if (!confirm(`Rename bus ${oldKey} → ${newKey}?`)) return;
+
+        const targetSnap = await db.ref(newPath).get();
+        if (targetSnap.exists()) return alert("Target bus number already exists. Choose another.");
+
+        const oldSnap = await db.ref(oldPath).get();
+        if (!oldSnap.exists()) return alert("Original bus not found (maybe deleted).");
+
+        const oldData = oldSnap.val() || {};
+        const merged = { ...oldData, Bus_Info: busInfo };
+
+        await db.ref(newPath).set(merged);
+        await db.ref(oldPath).remove();
+
+        alert(`Bus renamed successfully! (${oldKey} → ${newKey})`);
+        closeModal();
+        editingBusKey = null;
+
+      } catch (err) {
+        alert("Error: " + (err?.message || err));
+      }
+    });
+
+    function deleteBus(busKey) {
+      if (!confirm(`Are you sure you want to delete bus ${busKey}?`)) return;
+
+      db.ref(`driver_location/private_bus/${busKey}`).remove()
+        .then(() => alert("Bus deleted successfully!"))
+        .catch(error => alert("Error: " + error.message));
+    }
+    window.deleteBus = deleteBus;
+
+    /***********************
+     * Start
+     ***********************/
+    loadAllBuses();
+  </script>
+</body>
+
+</html>
